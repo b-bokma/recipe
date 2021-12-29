@@ -1,10 +1,12 @@
-version: "3.7"
+version: "3.8"
 
 services:
   postgres:
     image: postgres:12.5
-    env_file:
-      - ".env"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     expose:
@@ -15,14 +17,14 @@ services:
   app:
     container_name: recipe_api
     build:
-      context: .
-    volumes:
-      - ./:/app
+      context: ./backend
+      dockerfile: backend.dockerfile
     command: bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8080"
     env_file:
       - ".env"
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
       - PYTHONUNBUFFERED
       - DEBUG
       - PORT
@@ -32,6 +34,16 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
 
 volumes:
   postgresql_data:

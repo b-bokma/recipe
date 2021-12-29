@@ -281,4 +281,7 @@ cython_debug/
 */migrations/
 
 # migrations folder
-/app/db/migrations/versions/
+/backend/app/db/migrations/versions/
+
+# frontend thingies
+node_modules
