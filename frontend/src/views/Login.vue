@@ -6,38 +6,24 @@
           Sign in to your account
         </h2>
       </div>
-      <form action="#" class="mt-8 space-y-6" method="POST">
+      <p v-if="incorrectAuth">Incorrect username or password entered. Please try again</p>
+      <form action="#" class="mt-8 space-y-6" method="POST" v-on:submit.prevent="login">
         <input name="remember" type="hidden" value="true">
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
             <label class="sr-only" for="email-address">Email address</label>
-            <input id="email-address" autocomplete="email"
+            <input id="user" v-model="username" autocomplete="email"
                    class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                   name="email" placeholder="Email address" required type="email">
+                   name="username" placeholder="Email address" required type="email">
           </div>
           <div>
             <label class="sr-only" for="password">Password</label>
-            <input id="password" autocomplete="current-password"
+            <input id="pass" v-model="password"
                    class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                   name="password" placeholder="Password" required type="password">
+                   autocomplete="current-password" name="password" placeholder="Password" required type="password">
           </div>
         </div>
 
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input id="remember-me" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                   name="remember-me" type="checkbox">
-            <label class="ml-2 block text-sm text-gray-900" for="remember-me">
-              Remember me
-            </label>
-          </div>
-
-          <div class="text-sm">
-            <a class="font-medium text-indigo-600 hover:text-indigo-500" href="#">
-              Forgot your password?
-            </a>
-          </div>
-        </div>
 
         <div>
           <button
@@ -61,7 +47,29 @@
 </template>
 <script>
 export default {
-  name: "login"
+  name: 'login',
+  data() {
+    return {
+      username: '',
+      password: '',
+      incorrectAuth: false
+    }
+  },
+  methods: {
+    login() {
+      this.$store.dispatch('userLogin', {
+        username: this.username,
+        password: this.password
+      })
+          .then(() => {
+            this.$router.push({name: 'Home'})
+          })
+          .catch(err => {
+            console.log(err)
+            this.incorrectAuth = true
+          })
+    }
+  }
 }
 </script>
 

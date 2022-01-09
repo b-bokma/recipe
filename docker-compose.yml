@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: backend.dockerfile
-    command: bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8080"
+    command: bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
     env_file:
       - ".env"
     environment:
@@ -31,7 +31,7 @@ services:
     expose:
       - 8080
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       - postgres
 
@@ -44,6 +44,20 @@ services:
       PGADMIN_DEFAULT_PASSWORD: root
     ports:
       - "5050:80"
+
+  vue-app:
+    build:
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+    container_name: vue-app
+    restart: always
+    ports:
+      - "8080:8080"
+    command: sh -c "npm run serve"
+    depends_on:
+      - postgres
+      - app
+
 
 volumes:
   postgresql_data:
