@@ -1,4 +1,4 @@
-
+chmo
 # Created by https://www.toptal.com/developers/gitignore/api/python,pycharm,osx
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,pycharm,osx
 
@@ -285,3 +285,4 @@ cython_debug/
 
 # frontend thingies
 node_modules
+/kubernetes/kubeconfig-k8s-recipe.yaml

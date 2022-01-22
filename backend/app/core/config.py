@@ -1,37 +1,36 @@
-import logging
-from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, Any
 
-from dotenv import load_dotenv
-from pydantic import BaseSettings, PostgresDsn
-
-load_dotenv("../.env")
-
-logger = logging.getLogger(__name__)
+from pydantic import BaseSettings, validator
+from pydantic import PostgresDsn
 
 
-class EnvironmentEnum(str, Enum):
-    PRODUCTION = "production"
-    LOCAL = "local"
-
-
-class GlobalConfig(BaseSettings):
-    ENVIRONMENT: EnvironmentEnum
-    DEBUG: bool = False
-    TESTING: bool = False
+class Settings(BaseSettings):
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: str
+    POSTGRES_DB: str
     TIMEZONE: str
-    TITLE: str
-    DESCRIPTION: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     SECRET_KEY: str
-    DATABASE_URL: Optional[
-        PostgresDsn
-    ] = "postgresql://postgres:postgres@localhost:5432/postgres"  # just so it work locally
-    DB_ECHO_LOG: bool = False
-
-    # Api V1 prefix
+    DB_ECHO_LOG: str
     API_V1_STR: str
+    TITLE: str
+    DESCRIPTION: str
+    DATABASE_URL: Optional[PostgresDsn] = None
+
+    @validator("DATABASE_URL", pre=True)
+    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return PostgresDsn.build(
+            scheme="postgresql",
+            user=values.get("POSTGRES_USER"),
+            password=values.get("POSTGRES_PASSWORD"),
+            host=values.get("POSTGRES_SERVER"),
+            path=f"/{values.get('POSTGRES_DB') or ''}",
+        )
 
     @property
     def async_database_url(self) -> Optional[str]:
@@ -41,12 +40,9 @@ class GlobalConfig(BaseSettings):
             else self.DATABASE_URL
         )
 
-
     class Config:
-        case_sensitive = True
-        env_prefix = ""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+        env_file = '.env'
+        env_file_encoding = 'utf-8'
 
 
-settings = GlobalConfig()
+settings = Settings()

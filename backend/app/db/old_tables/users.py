@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy import func
+from sqlalchemy.orm import relationship
 
 from ..base_class import Base
 
@@ -11,6 +12,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_onupdate=func.now(), nullable=True)
     is_superuser = Column(Boolean, default=False)
+    recipes = relationship('Recipe', back_populates='submitter')
     hashed_password = Column(String, nullable=False)
 
 

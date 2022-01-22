@@ -1,63 +1,45 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:12.5
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+  db:
+    image: postgres:latest
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
-    expose:
-      - 5432
+      - postgres-data:/var/lib/postgresql/data/
+    env_file:
+      - ./backend/.env
     ports:
       - "5432:5432"
 
-  app:
+  api:
     container_name: recipe_api
+    image: rg.nl-ams.scw.cloud/recipe/api
     build:
       context: ./backend
-      dockerfile: backend.dockerfile
-    command: bash -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
-    env_file:
-      - ".env"
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
-      - PYTHONUNBUFFERED
-      - DEBUG
-      - PORT
-    expose:
-      - 8080
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    expose:
+      - 8000
+    command: [ "uvicorn", "app.main:app" ]
+    env_file:
+      - backend/.env
     depends_on:
-      - postgres
-
-  pgadmin:
-    container_name: pgadmin4_container
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - "5050:80"
+      - db
 
   vue-app:
     build:
       context: ./frontend
-      dockerfile: frontend.dockerfile
-    container_name: vue-app
+      dockerfile: Dockerfile
+    container_name: recipe_frontend
+    image: rg.nl-ams.scw.cloud/recipe/vue-app
     restart: always
     ports:
       - "8080:8080"
-    command: sh -c "npm run serve"
+    expose:
+      - 8080
     depends_on:
-      - postgres
-      - app
-
+      - db
+      - api
 
 volumes:
-  postgresql_data:
+  postgres-data:

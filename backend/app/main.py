@@ -19,18 +19,25 @@ def get_application() -> FastAPI:
     application = FastAPI(
         title=settings.TITLE,
         description=settings.DESCRIPTION,
-        debug=settings.DEBUG
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        docs_url=f"{settings.API_V1_STR}/docs"
     )
-    application.include_router(api_router, prefix=settings.API_V1_STR)
+    application.include_router(api_router, prefix=f"{settings.API_V1_STR}")
     return application
 
 
 app = get_application()
 
+
+@app.get("/")
+async def main():
+    return {"Welcome to the api"}
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
